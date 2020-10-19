@@ -9,12 +9,15 @@ import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
-import vip.mate.core.auth.annotation.EnableToken;
+import vip.mate.core.auth.annotation.PreAuth;
 import vip.mate.core.common.api.Result;
+import vip.mate.core.common.constant.MateConstant;
+import vip.mate.core.common.constant.Oauth2Constant;
+import vip.mate.core.file.util.ExcelUtil;
 import vip.mate.core.log.annotation.Log;
+import vip.mate.core.redis.core.RedisService;
 import vip.mate.core.web.controller.BaseController;
 import vip.mate.core.web.util.CollectionUtil;
-import vip.mate.core.file.util.ExcelUtil;
 import vip.mate.system.entity.SysRole;
 import vip.mate.system.entity.SysRolePermission;
 import vip.mate.system.poi.SysRolePOI;
@@ -44,6 +47,7 @@ public class SysRoleController extends BaseController {
 
     private final ISysRoleService sysRoleService;
     private final ISysRolePermissionService sysRolePermissionService;
+    private final RedisService redisService;
 
     /**
      * 角色列表
@@ -51,7 +55,7 @@ public class SysRoleController extends BaseController {
      * @param query 　关键词查询
      * @return Result
      */
-    @EnableToken
+    @PreAuth
     @Log(value = "角色列表", exception = "角色列表请求异常")
     @GetMapping("/list")
     @ApiOperation(value = "角色列表", notes = "角色列表，根据query查询")
@@ -70,7 +74,7 @@ public class SysRoleController extends BaseController {
      * @param sysRole SysRole对象
      * @return Result
      */
-    @EnableToken
+    @PreAuth
     @Log(value = "角色设置", exception = "角色设置请求异常")
     @PostMapping("/set")
     @ApiOperation(value = "角色设置", notes = "角色设置,支持新增或修改")
@@ -84,7 +88,7 @@ public class SysRoleController extends BaseController {
      * @param id id
      * @return Result
      */
-    @EnableToken
+    @PreAuth
     @Log(value = "角色信息", exception = "角色信息请求异常")
     @GetMapping("/get")
     @ApiOperation(value = "角色信息", notes = "根据ID查询")
@@ -103,7 +107,7 @@ public class SysRoleController extends BaseController {
      * @param ids 多个id使用逗号分隔
      * @return Result
      */
-    @EnableToken
+    @PreAuth
     @Log(value = "角色删除", exception = "角色删除请求异常")
     @PostMapping("/delete")
     @ApiOperation(value = "角色删除", notes = "角色删除，支持批量操作")
@@ -120,7 +124,7 @@ public class SysRoleController extends BaseController {
      * @param id id
      * @return Result
      */
-    @EnableToken
+    @PreAuth
     @Log(value = "角色权限列表", exception = "角色权限列表请求异常")
     @GetMapping("/get-permission")
     @ApiOperation(value = "角色权限列表", notes = "角色权限列表")
@@ -135,7 +139,7 @@ public class SysRoleController extends BaseController {
      * @param ids    多个id使用逗号分隔
      * @return Result
      */
-    @EnableToken
+    @PreAuth
     @Log(value = "角色权限设置", exception = "角色权限设置")
     @PostMapping("/set-permission")
     @ApiOperation(value = "角色权限设置", notes = "角色权限设置")
@@ -156,6 +160,7 @@ public class SysRoleController extends BaseController {
             sysRolePermission.setRoleId(roleIdc);
             sysRolePermissionService.saveOrUpdate(sysRolePermission);
         }
+        redisService.del("getPermission-" + roleId);
         return Result.success("操作成功");
     }
 
@@ -164,7 +169,7 @@ public class SysRoleController extends BaseController {
      *
      * @return Result
      */
-    @EnableToken
+    @PreAuth
     @Log(value = "角色树", exception = "角色树请求异常")
     @GetMapping("/tree")
     @ApiOperation(value = "角色树", notes = "角色树")
@@ -175,7 +180,7 @@ public class SysRoleController extends BaseController {
     /**
      * 角色导出
      */
-    @EnableToken
+    @PreAuth
     @Log(value = "导出角色", exception = "导出角色")
     @PostMapping("/export")
     @ApiOperation(value = "导出角色", notes = "导出角色")
